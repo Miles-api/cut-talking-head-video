@@ -1,0 +1,6 @@
+interface:
+  display_name: "口播视频智能剪辑"
+  short_description: "丢视频进来，自动识别音轨、生成字幕分镜、Remotion 动画成片"
+  default_prompt: "请处理当前目录中的 input.mp4，如果没有 subtitles.srt 就先自动识别原音轨，生成字幕和分镜给我确认，确认后调用 Remotion 制作动画并渲染成片。保留原始声音，字幕逐字显示，真人放在中间偏右小圆窗。"
+policy:
+  allow_implicit_invocation: true
