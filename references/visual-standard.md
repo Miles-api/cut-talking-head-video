@@ -34,6 +34,8 @@ Use this reference while writing the storyboard and implementing scenes.
 - Give a sub-one-second cue one clear action, never a stack of effects.
 - Strength should vary: conflict/data/turn/conclusion may be high; explanation is low or medium.
 - Reuse a spatial motif to maintain continuity rather than resetting the entire screen.
+- **Vertical rhythm: design for the 1080×1920 canvas.** Use the full height — push objects from bottom to top, cascade layers vertically, place key elements in the upper third and lower third with breathing room in between. Avoid centering everything; off-center placement with generous scale creates cinematic tension. Think of each beat as a vertical composition, not a landscape one squeezed into portrait.
+- Minimum 3 spatial layers per beat. The presenter circle is not a layer — it's the final overlay.
 
 ## Presenter composition
 
@@ -41,7 +43,9 @@ Use this reference while writing the storyboard and implementing scenes.
 - Default diameter 20–25% of canvas width.
 - Keep facial proportions unchanged.
 - Prefer a stable crop. Tracking is allowed only when it improves framing without visible jitter.
-- Keep important motion graphics mainly in the left/center-left field.
+- **Canvas rule: the presenter is a floating overlay, NOT a hard split.** BackgroundScene covers the ENTIRE 1080×1920 canvas — top to bottom, left to right. Never confine animations to one side to "make room" for the presenter. The presenter sits on top of a full-screen animated world, like a broadcast overlay, not a split-screen video call.
+- Motion graphics should occupy significant portions of the canvas, using the full vertical height (1920px) and full width (1080px). Think widescreen cinematic composition adapted to vertical — sweeping camera moves, large-scale typography, deep parallax layers that fill the frame.
+- The presenter circle may occasionally overlap with background elements — a slight overlap adds depth and feels intentional, not like a mistake.
 
 ## Subtitle integrity
 

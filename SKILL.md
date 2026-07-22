@@ -26,6 +26,7 @@ You are a video editing agent. When a user drops a `.mp4` file and invokes this 
 6. **Render, don't just code.** The task is incomplete until `output/final.mp4` is actually rendered and verified.
 7. **Two approval gates.** Never start expensive rendering before the user approves the transcript/storyboard. Never deliver the final video without a preview check.
 8. **Graphics language = source language.** All on-screen graphic text — labels, chart axes, data overlays, callouts, UI mockups, scene titles — must appear in the detected spoken language (`$SRC_LANG`). Never write Remotion visual text in English unless the speaker is speaking English.
+9. **Full-canvas animation.** BackgroundScene must fill the entire 1080×1920 canvas — top to bottom, edge to edge. The presenter is a floating overlay on a rich full-screen world, NOT a split-screen partner. Graphics should occupy significant portions of the vertical frame with depth layers and cinematic scale. Never tuck animations into a corner to "leave room."
 
 ---
 
@@ -187,27 +188,30 @@ Create these components (separate files, not one monolith):
 - `src/VideoPlayer.tsx` — `<Video>` from `@remotion/video` playing `input.mp4`, circular crop
 - `src/PresenterCircle.tsx` — mask, border glow, shadow, optional breathing scale
 - `src/Subtitles.tsx` — reads `transcript_bilingual.json`, renders verbatim bilingual captions (source language on top, larger; translation below, smaller) at correct times
-- `src/BackgroundScene.tsx` — renders the semantic visual for the current beat
+- `src/BackgroundScene.tsx` — renders the semantic visual for the current beat. **Fills the ENTIRE 1080×1920 canvas (not just a portion).** Uses depth layers (background → midground → foreground) to create spatial richness. Should feel like a cinematic vertical world, not a corner decoration.
 - `src/Composition.tsx` — main composition, 1080×1920, 30fps, layers in order
 
-Layer order (bottom to top):
-1. Background scene (animated graphics)
-2. Content images (if any, max 2)
-3. Graphic labels and data overlays
-4. Verbatim subtitles (lower safe area)
-5. Presenter circle (center-right)
+Layer order (bottom to top), ALL layers are full-canvas unless noted:
+1. Background scene (animated graphics — FULL CANVAS)
+2. Content images (if any, max 2 — can be large, not thumbnails)
+3. Graphic labels and data overlays (large-scale typography, significant screen real estate)
+4. Verbatim subtitles (lower safe area only)
+5. Presenter circle (center-right — floating overlay on top of the scene)
 
 ### Step 8 — Implement scenes per beat
 
 For each beat in `storyboard.json`, create a visual scene that matches its `semantic_purpose` and `animation_events`. Follow `references/visual-standard.md` for the semantic mapping.
 
 Key rules:
+- **Canvas scale: animations must occupy significant portions of the 1080×1920 frame.** Use the full width and height. Large typography, sweeping camera pushes across the full vertical space, parallax layers that span edge to edge. Avoid small isolated elements floating in empty space.
+- **Depth architecture: every scene needs at minimum 3 spatial layers** — background (atmosphere, gradients, subtle motion), midground (primary visual element like a chart, model core, node map), foreground (sharp data callouts, large labels). Each layer fills the canvas independently.
 - **Language rule: ALL on-screen graphic text in Remotion components (`<div>`, `<span>`, `<p>`, labels, chart axes, data callouts, UI mockups, scene titles) must be written in `$SRC_LANG`.** If `$SRC_LANG` is `"zh"`, every graphic label is Chinese. If `$SRC_LANG` is `"en"`, every graphic label is English. Never default to English for a non-English video.
 - Animations start 0.1-0.2s before their keyword
 - Hold a coherent visual world for 3-8 seconds (not one per SRT line)
 - Vary intensity: high for hook/data/turn/conclusion, low/medium for explanation
 - Use continuous spatial motion (camera push, parallax, layer reveal) instead of hard cuts
 - Short beats get one clear action, not a pile of effects
+- Presenter circle may slightly overlap background elements — this creates depth, not a bug
 
 ### Step 9 — Render low-res preview
 
