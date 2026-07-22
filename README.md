@@ -1,4 +1,4 @@
-# cut-talking-head-video `v2.0.0`
+# cut-talking-head-video `v0.1.1`
 
 Turn a recorded talking-head video into a polished 9:16 animated short with **bilingual subtitles** — all inside Codex. Auto-detects spoken language, generates full-canvas cinematic animations, and shows the presenter only at key moments. No editing software required.
 
