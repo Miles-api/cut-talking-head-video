@@ -242,7 +242,7 @@ def parser() -> argparse.ArgumentParser:
     a.add_argument("--video", required=True); a.add_argument("--srt"); a.add_argument("--out", required=True); a.add_argument("--require-srt", action="store_true")
     a.set_defaults(func=cmd_preflight)
     a = sub.add_parser("transcribe")
-    a.add_argument("--audio", required=True); a.add_argument("--out", required=True); a.add_argument("--model", default="medium"); a.add_argument("--language", default="zh")
+    a.add_argument("--audio", required=True); a.add_argument("--out", required=True); a.add_argument("--model", default="medium"); a.add_argument("--language", default=None)
     a.add_argument("--device", default="auto"); a.add_argument("--compute-type", default="int8")
     a.set_defaults(func=cmd_transcribe)
     a = sub.add_parser("verify")

@@ -49,17 +49,17 @@ Create a programmatic reconciliation check between source cues and rendered cue 
 
 By default, subtitles are bilingual:
 
-- **Chinese (top)**: bold white, ~26–30px, the primary spoken language.
-- **English (bottom)**: regular weight, light grey (#B0B8C4), ~16–20px, placed directly below the Chinese line with 4–8px gap.
+- **Source language (top)**: bold white, ~26–30px, the primary spoken language detected from the audio.
+- **Translation (bottom)**: regular weight, light grey (#B0B8C4), ~16–20px, placed directly below the source line with 4–8px gap.
 - Both lines share a common dark semi-transparent backing strip.
-- Chinese keywords (model names, prices, technical terms, proper nouns) may use cyan-blue or warm-gold emphasis — applied to the Chinese line only, never to English.
-- English line must be a natural translation of the Chinese spoken text, not a machine-literal gloss.
+- Keyword emphasis (model names, prices, technical terms, proper nouns) uses cyan-blue or warm-gold — applied to the source-language line only, never to the translation.
+- Translation must be a natural rendering of the source text, not a machine-literal gloss.
 
 ### Single-language mode
 
-When the user explicitly requests Chinese-only (只说中文, 不要英文):
+When the user explicitly requests single-language (只说中文, English only, 不要英文, no bilingual):
 
-- maximum two lines of Chinese;
+- maximum two lines of the detected source language;
 - sensible wrapping by measured width, not character count alone.
 
 ### General styling

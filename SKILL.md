@@ -1,6 +1,6 @@
 ---
 name: cut-talking-head-video
-description: Turn a recorded Chinese talking-head video into a polished 9:16 animated short video with Remotion. Trigger when the user drops a video file and asks to 剪辑口播视频, 做视频, 生成动画视频, or types $cut-talking-head-video. Works with or without subtitles.srt. Preserves the original voice track, uses verbatim subtitles, places the presenter in a small circular window at center-right, and generates spatial animated graphics with at most 1-2 context-relevant images.
+description: Turn a recorded talking-head video into a polished 9:16 animated short video with Remotion. Auto-detects the spoken language and generates subtitles, labels, and UI in that language by default. Trigger when the user drops a video file and asks to 剪辑口播视频, 做视频, 生成动画视频, or types $cut-talking-head-video. Works with or without subtitles.srt. Preserves the original voice track, uses verbatim subtitles, places the presenter in a small circular window at center-right, and generates spatial animated graphics with at most 1-2 context-relevant images.
 ---
 
 # Cut Talking-Head Video
@@ -72,41 +72,52 @@ Transcribe with faster-whisper. Install it if needed (do NOT use a paid API with
 python3 -m venv .venv
 .venv/bin/pip install faster-whisper
 .venv/bin/python "$SKILL_DIR/scripts/video_pipeline.py" transcribe \
-  --audio work/speech.wav --out work --model medium --language zh
+  --audio work/speech.wav --out work --model medium
 ```
 
+Note: `--language` is omitted, so faster-whisper auto-detects the spoken language.
+
 This creates:
-- `work/transcript.raw.json` — segments with word-level timestamps
-- `work/transcript.srt` — Chinese subtitle cues
-- `work/transcript.txt` — continuous Chinese text
+- `work/transcript.raw.json` — segments with word-level timestamps; includes `language` field with the detected language
+- `work/transcript.srt` — subtitle cues in the detected language
+- `work/transcript.txt` — continuous text
 - `work/transcript_review.md` — flagged uncertain items (brand names, English terms, numbers, low-confidence segments)
 
 Read `work/transcript_review.md`. **Highlight every uncertain item prominently** when presenting to the user. Never silently guess a brand name or number.
 
+**Language detection:** Read `work/transcript.raw.json` → `language` field. Store the detected language code (e.g. `"zh"`, `"en"`, `"ja"`) as `$SRC_LANG`. This drives all subsequent decisions — subtitle layout, translation direction, and Remotion UI labels.
+
 ### Step 3b — Generate bilingual subtitles
 
-After the Chinese transcript is confirmed, translate it **sentence by sentence** to natural English. Preserve the original SRT timestamps — the English cue boundaries must match the Chinese ones exactly.
+After the transcript is confirmed, **determine translation direction based on `$SRC_LANG`**:
 
-Create `work/transcript_en.srt` with the same cue count and identical timestamps as `work/transcript.srt`.
+- If `$SRC_LANG` is `"zh"` → translate Chinese → English
+- If `$SRC_LANG` is `"en"` or another non-Chinese language → translate English/other → Chinese
+- General rule: the translation target is the complement language (Chinese ↔ English/other)
+
+Translate **sentence by sentence** to natural language. Preserve the original SRT timestamps — the translation cue boundaries must match the source ones exactly.
+
+Create `work/transcript_tgt.srt` with the same cue count and identical timestamps as `work/transcript.srt`.
 
 Translation rules:
-- Translate meaning, not word-for-word. English should read naturally.
+- Translate meaning, not word-for-word. Target language should read naturally.
 - Preserve brand names, product names, and proper nouns as-is (Kimi, iPing, Codex, etc.).
-- For technical terms, use the standard English equivalent (开放权重 → open weights, 算力 → compute, 闭源 → closed-source).
+- For technical terms, use the standard equivalent in the target language.
 - Keep numbers and units exactly as spoken.
-- Never add explanations, caveats, or content not present in the original Chinese.
+- Never add explanations, caveats, or content not present in the original.
 
 Create `work/transcript_bilingual.json`:
 ```json
 [
-  {"index": 1, "start": 0.0, "end": 1.5, "zh": "大家好我是土狗", "en": "Hey everyone, I'm Tugou"},
-  {"index": 2, "start": 1.5, "end": 3.2, "zh": "今天聊AI", "en": "Today let's talk about AI"}
+  {"index": 1, "start": 0.0, "end": 1.5, "src": "大家好我是土狗", "tgt": "Hey everyone, I'm Tugou"},
+  {"index": 2, "start": 1.5, "end": 3.2, "src": "今天聊AI", "tgt": "Today let's talk about AI"}
 ]
 ```
+(Field names: `src` for the source/subtitle language, `tgt` for the translated language.)
 
 This file drives the Remotion bilingual subtitle component.
 
-If the user explicitly requests single-language (只说中文 or 不要英文), skip this step and only use `work/transcript.srt`.
+If the user explicitly requests single-language (只说中文 / English only / 不用双语 / no bilingual), skip this step and only use `work/transcript.srt`.
 
 ### Step 4 — Build storyboard
 
@@ -174,7 +185,7 @@ npm install
 Create these components (separate files, not one monolith):
 - `src/VideoPlayer.tsx` — `<Video>` from `@remotion/video` playing `input.mp4`, circular crop
 - `src/PresenterCircle.tsx` — mask, border glow, shadow, optional breathing scale
-- `src/Subtitles.tsx` — reads `transcript_bilingual.json`, renders verbatim bilingual captions (Chinese on top, larger; English below, smaller) at correct times
+- `src/Subtitles.tsx` — reads `transcript_bilingual.json`, renders verbatim bilingual captions (source language on top, larger; translation below, smaller) at correct times
 - `src/BackgroundScene.tsx` — renders the semantic visual for the current beat
 - `src/Composition.tsx` — main composition, 1080×1920, 30fps, layers in order
 
@@ -272,7 +283,7 @@ Refer to `references/visual-standard.md` for the full specification. Quick refer
 - **Canvas**: 1080×1920, 9:16, 30fps, H.264 + AAC
 - **Palette**: graphite/black-blue background, cool white text, cyan-blue emphasis, warm gold for turns, orange/red sparingly for warnings
 - **Presenter**: circle at center-right, cool-white rim, blue-purple edge light, soft shadow, subtle 1.00-1.025 breathing scale
-- **Subtitles**: lower safe area, bilingual (Chinese on top bold white ~28px, English below ~18px light grey), max 1 line each, cyan/gold keywords on Chinese line, dark semi-transparent backing, no karaoke bounce
+- **Subtitles**: lower safe area, bilingual (source language on top bold white ~28px, translation below ~18px light grey), max 1 line each, keyword emphasis (cyan/gold) on source-language line only, dark semi-transparent backing, no karaoke bounce
 - **Images**: max 2 total, only when directly relevant, always with source attribution
 
 ## When blocked
