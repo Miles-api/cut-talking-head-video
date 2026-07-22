@@ -1,8 +1,8 @@
 # cut-talking-head-video
 
-Turn a recorded Chinese talking-head video into a polished 9:16 animated short with **bilingual (CN+EN) subtitles** — all inside Codex. No editing software required.
+Turn a recorded talking-head video into a polished 9:16 animated short with **bilingual subtitles** — all inside Codex. Auto-detects spoken language, generates full-canvas cinematic animations, and shows the presenter only at key moments. No editing software required.
 
-**把录制的中文口播视频，在 Codex 里一键生成带中英双语字幕的竖屏动画短片。**
+**把口播视频丢进来，自动识别语言，生成全画幅竖屏动画 + 双语字幕。主持人按节奏淡入淡出，画面铺满不拥挤。**
 
 ## Flow | 流程
 
@@ -10,26 +10,22 @@ Turn a recorded Chinese talking-head video into a polished 9:16 animated short w
 Drop input.mp4
       │
       ▼
-Audio → Whisper transcription (Chinese)
+Audio → faster-whisper (auto-detect language)
       │
       ▼
-Generate English translation
-      │
-      ▼
-Bilingual SRT timeline
+Generate bilingual translation (src↔tgt)
       │
       ▼
 Build storyboard (spoken sentence → visual animation)
-      │
+      │  - Presenter visibility: per-beat toggle (40-60% of runtime)
+      │  - User-provided images get priority placement
       ▼
 ⏸ Your approval: review transcript & storyboard
       │
       ▼
-$remotion → spatial 3D animated graphics
-      │
-      ▼
-Presenter in small circular window (center-right)
-      │
+$remotion → full-canvas 3D animated graphics (3 depth layers)
+      │  - Presenter circle at center-right (floating overlay, not split-screen)
+      │  - ALL graphic text in detected source language
       ▼
 Render low-res preview
       │
@@ -42,17 +38,25 @@ Render 1080×1920 MP4 + auto-verify
 
 ## Quick Start | 快速开始
 
-```
+```bash
 $cut-talking-head-video 开始剪辑
 ```
 
 Or just drop a video and say "帮我剪辑这条口播视频".
 
+## Features | 特性
+
+- 🌐 **Language auto-detect**: Whisper detects spoken language, animation labels follow
+- 🎬 **Full-canvas cinematic**: 3-layer depth, sweeping vertical compositions
+- 👤 **Smart presenter**: Fades in/out strategically, not shown continuously
+- 🖼️ **User media**: Drop images alongside the video — they get priority placement
+- 📝 **Bilingual subtitles**: Source language on top, translation below
+
 ## Requirements | 依赖
 
 - FFmpeg, Node.js
 - Remotion plugin: `$skill-installer remotion`
-- Whisper (auto-installed via `pip install faster-whisper`)
+- faster-whisper (auto-installed on first run)
 
 ## Installation | 安装
 
