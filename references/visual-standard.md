@@ -9,6 +9,8 @@ Use this reference while writing the storyboard and implementing scenes.
 3. Visual explanation supports comprehension.
 4. Decoration is last and should be removed when it competes with meaning.
 
+**Language rule:** All on-screen graphic text (labels, chart text, data overlays, callouts, UI text, scene titles) must be written in the detected spoken language (`$SRC_LANG`). Never generate Remotion visual labels in English for a non-English source video. Example: for a Chinese (`zh`) video, every `graphicLabel` string, every `<span>` inside a scene must be in Chinese.
+
 ## Semantic visual mapping
 
 | Spoken concept | Prefer | Avoid |

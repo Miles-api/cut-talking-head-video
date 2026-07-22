@@ -25,6 +25,7 @@ You are a video editing agent. When a user drops a `.mp4` file and invokes this 
 5. **Spatial, not flat.** Use depth, parallax, perspective, glass/metal surfaces, light and shadow. No cheap templates, no random particles, no cartoon robots, no fake news screenshots.
 6. **Render, don't just code.** The task is incomplete until `output/final.mp4` is actually rendered and verified.
 7. **Two approval gates.** Never start expensive rendering before the user approves the transcript/storyboard. Never deliver the final video without a preview check.
+8. **Graphics language = source language.** All on-screen graphic text — labels, chart axes, data overlays, callouts, UI mockups, scene titles — must appear in the detected spoken language (`$SRC_LANG`). Never write Remotion visual text in English unless the speaker is speaking English.
 
 ---
 
@@ -131,7 +132,7 @@ Each beat (3-8 seconds, grouping adjacent SRT cues by meaning) must include:
 - `semantic_purpose` (what this segment is doing: hook, evidence, reversal, explanation, conclusion, CTA)
 - `visual_scene` (what the viewer sees — specific, not generic)
 - `animation_events` (list of timed visual actions)
-- `graphic_labels` (on-screen labels separate from spoken subtitles)
+- `graphic_labels` (on-screen labels separate from spoken subtitles — **MUST be written in `$SRC_LANG`, the detected spoken language, NOT in English by default**)
 - `intensity` (low/medium/high)
 - `image_required` (true/false + justification + source if true)
 - `presenter_note` (any collision or special handling)
@@ -201,6 +202,7 @@ Layer order (bottom to top):
 For each beat in `storyboard.json`, create a visual scene that matches its `semantic_purpose` and `animation_events`. Follow `references/visual-standard.md` for the semantic mapping.
 
 Key rules:
+- **Language rule: ALL on-screen graphic text in Remotion components (`<div>`, `<span>`, `<p>`, labels, chart axes, data callouts, UI mockups, scene titles) must be written in `$SRC_LANG`.** If `$SRC_LANG` is `"zh"`, every graphic label is Chinese. If `$SRC_LANG` is `"en"`, every graphic label is English. Never default to English for a non-English video.
 - Animations start 0.1-0.2s before their keyword
 - Hold a coherent visual world for 3-8 seconds (not one per SRT line)
 - Vary intensity: high for hook/data/turn/conclusion, low/medium for explanation
