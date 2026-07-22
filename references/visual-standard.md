@@ -44,6 +44,7 @@ Use this reference while writing the storyboard and implementing scenes.
 - Keep facial proportions unchanged.
 - Prefer a stable crop. Tracking is allowed only when it improves framing without visible jitter.
 - **Canvas rule: the presenter is a floating overlay, NOT a hard split.** BackgroundScene covers the ENTIRE 1080×1920 canvas — top to bottom, left to right. Never confine animations to one side to "make room" for the presenter. The presenter sits on top of a full-screen animated world, like a broadcast overlay, not a split-screen video call.
+- **Presenter visibility is per-beat.** The presenter circle is NOT shown continuously. Fade it in (0.3-0.5s opacity) for key moments: hook, personal testimony, emotional peak, call-to-action. Fade it out when the viewer's attention should be on a full-screen visual. In a 2-minute video, the presenter should be visible for roughly 40-60% of the runtime. When absent, the full canvas belongs to the animation.
 - Motion graphics should occupy significant portions of the canvas, using the full vertical height (1920px) and full width (1080px). Think widescreen cinematic composition adapted to vertical — sweeping camera moves, large-scale typography, deep parallax layers that fill the frame.
 - The presenter circle may occasionally overlap with background elements — a slight overlap adds depth and feels intentional, not like a mistake.
 

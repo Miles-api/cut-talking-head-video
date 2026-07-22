@@ -20,8 +20,8 @@ You are a video editing agent. When a user drops a `.mp4` file and invokes this 
 
 1. **Original voice only.** Never generate TTS, never clone or replace the voice, never alter speech speed.
 2. **Verbatim subtitles.** Every spoken word must appear in the on-screen subtitles. Do not summarise, rewrite, omit, reorder, or add spoken claims.
-3. **Small circular presenter.** The presenter must be a circular crop at center-right (x≈68-73%, y≈43-52%), 20-25% of canvas width. Never make the presenter full-screen.
-4. **Max 1-2 images per video.** Zero images is fine. Use them only when a real product, event, environment, or news item is explicitly referenced. Otherwise use code-generated 3D/motion graphics.
+3. **Small circular presenter — shown selectively, not continuously.** The presenter appears as a circular crop at center-right (x≈68-73%, y≈43-52%), 20-25% of canvas width. Never make the presenter full-screen. **The presenter is NOT a permanent fixture.** Fade it in during key statements, personal testimony, emotional peaks, or call-to-action — fade it out when the focus should be on the visuals. A typical 2-minute video should have the presenter visible for roughly 40-60% of the runtime. Use opacity transitions (0.3-0.5s fade), not hard cuts.
+4. **Max 1-2 images per video — plus user-provided media.** Zero images is fine. Use them only when a real product, event, environment, or news item is explicitly referenced. Otherwise use code-generated 3D/motion graphics. **If the user explicitly provides images, screenshots, or product photos — use them.** Treat user-supplied media as high-priority scene elements: display them prominently, not as a tiny corner insert.
 5. **Spatial, not flat.** Use depth, parallax, perspective, glass/metal surfaces, light and shadow. No cheap templates, no random particles, no cartoon robots, no fake news screenshots.
 6. **Render, don't just code.** The task is incomplete until `output/final.mp4` is actually rendered and verified.
 7. **Two approval gates.** Never start expensive rendering before the user approves the transcript/storyboard. Never deliver the final video without a preview check.
@@ -39,6 +39,8 @@ Find the video file from the conversation. The user may have dropped it, mention
 Look for `./subtitles.srt` or any dropped `.srt` file. Set `HAS_SRT=true` or `HAS_SRT=false`.
 
 Create `./work/` directory for all intermediate files.
+
+Also scan for any user-provided media files alongside the video — `.png`, `.jpg`, `.jpeg`, `.webp` files the user may have dropped. If found, note them as `USER_IMAGES` and use them as priority scene elements.
 
 ### Step 2 — Preflight (always run)
 
@@ -135,7 +137,8 @@ Each beat (3-8 seconds, grouping adjacent SRT cues by meaning) must include:
 - `animation_events` (list of timed visual actions)
 - `graphic_labels` (on-screen labels separate from spoken subtitles — **MUST be written in `$SRC_LANG`, the detected spoken language, NOT in English by default**)
 - `intensity` (low/medium/high)
-- `image_required` (true/false + justification + source if true)
+- `image_required` (true/false + justification + source if true; prioritize any `USER_IMAGES` found in Step 1)
+- `show_presenter` (true/false — only show the presenter circle in this beat if there's a reason: personal statement, emotional peak, direct address to viewer, call-to-action)
 - `presenter_note` (any collision or special handling)
 
 Also create `work/cue-visual-matrix.json` — one row per SRT cue, mapping each spoken sentence to its exact visual representation. This matrix is the contract: every spoken claim must have a corresponding visual action, and no visual may introduce claims absent from the transcript.
@@ -186,7 +189,7 @@ npm install
 
 Create these components (separate files, not one monolith):
 - `src/VideoPlayer.tsx` — `<Video>` from `@remotion/video` playing `input.mp4`, circular crop
-- `src/PresenterCircle.tsx` — mask, border glow, shadow, optional breathing scale
+- `src/PresenterCircle.tsx` — mask, border glow, shadow, optional breathing scale. **Accepts an `opacity` prop controlled by the beat's `show_presenter` field.** Fade in/out over 0.3-0.5s using Remotion's `useCurrentFrame()` + `interpolate()`. When hidden, the presenter takes zero visual space — the full background animation fills the canvas.
 - `src/Subtitles.tsx` — reads `transcript_bilingual.json`, renders verbatim bilingual captions (source language on top, larger; translation below, smaller) at correct times
 - `src/BackgroundScene.tsx` — renders the semantic visual for the current beat. **Fills the ENTIRE 1080×1920 canvas (not just a portion).** Uses depth layers (background → midground → foreground) to create spatial richness. Should feel like a cinematic vertical world, not a corner decoration.
 - `src/Composition.tsx` — main composition, 1080×1920, 30fps, layers in order
@@ -212,6 +215,7 @@ Key rules:
 - Use continuous spatial motion (camera push, parallax, layer reveal) instead of hard cuts
 - Short beats get one clear action, not a pile of effects
 - Presenter circle may slightly overlap background elements — this creates depth, not a bug
+- **Presenter toggle: use `show_presenter` from the storyboard to control visibility per beat.** Fade out the presenter when the focus shifts to a full-screen visual (data chart, product image, comparison). Fade back in for personal testimony, hook, and call-to-action. Beats without the presenter should feel immersive and cinematic — the whole canvas belongs to the visual story.
 
 ### Step 9 — Render low-res preview
 
