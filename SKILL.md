@@ -1,5 +1,6 @@
 ---
 name: cut-talking-head-video
+version: 2.0.0
 description: Turn a recorded talking-head video into a polished 9:16 animated short video with Remotion. Auto-detects the spoken language and generates subtitles, labels, and UI in that language by default. Trigger when the user drops a video file and asks to 剪辑口播视频, 做视频, 生成动画视频, or types $cut-talking-head-video. Works with or without subtitles.srt. Preserves the original voice track, uses verbatim subtitles, places the presenter in a small circular window at center-right, and generates spatial animated graphics with at most 1-2 context-relevant images.
 ---
 
